@@ -23,6 +23,16 @@ function sentences(value: string) {
     .slice(0, 4);
 }
 
+function pick<T>(items: T[], value: string) {
+  const hash = [...value].reduce((total, char) => (total * 31 + char.charCodeAt(0)) >>> 0, 0);
+  return items[hash % items.length];
+}
+
+function topicFrom(question: string) {
+  const match = question.match(/(?:for|about|on|pass)\s+(.+?)(?:[?.!,]|$)/i);
+  return match?.[1]?.trim() || excerpt(question, 100);
+}
+
 export function createOfflineResume(input: ResumeInput) {
   const highlights = sentences(input.background);
   const bullets = (
@@ -153,15 +163,34 @@ export function createOfflineChatReply(messages: UIMessage[]) {
     .trim();
   const question = prompt || "Tell me what you are working on.";
   const normalized = question.toLowerCase();
+  const turn = messages.filter((message) => message.role === "assistant").length + 1;
+  const topic = topicFrom(question);
 
   if (/(exam|study|learn|certif|aws)/.test(normalized)) {
-    return `## Study plan\n\nFor **${excerpt(question, 180)}**, focus on active recall and short daily practice.\n\n### This week\n\n1. Break the syllabus into 5–7 topics and study one per day.\n2. Make 5 flashcards after each session.\n3. End every session with 10 practice questions.\n\n### Next week\n\n1. Revisit weak topics first.\n2. Complete two timed practice sets.\n3. Write a one-page cheat sheet from memory, then correct it.\n\n**Today’s first step:** choose the first topic and spend 15 minutes outlining what you already know.`;
+    const focus = pick(
+      [
+        "core concepts and vocabulary",
+        "scenario-based practice questions",
+        "weak areas revealed by practice tests",
+      ],
+      question,
+    );
+    return `## ${topic} study plan\n\n**Focus for session ${turn}:** ${focus}.\n\n### 60-minute session\n\n1. **10 min — Recall:** write everything you remember about ${topic}.\n2. **25 min — Learn:** study one subtopic and make 5 short flashcards.\n3. **15 min — Apply:** answer practice questions without notes.\n4. **10 min — Review:** explain the hardest answer in your own words.\n\n### Checkpoint\n\nAt the end, score yourself from 1–5. If you score under 4, repeat the same subtopic tomorrow with a new example.\n\n**Next question for you:** which part of ${topic} feels hardest right now?`;
   }
   if (/(resume|cv|linkedin|job application)/.test(normalized)) {
-    return `## Resume improvement\n\nFor **${excerpt(question, 180)}**, make each bullet follow this pattern:\n\n**Action + scope + measurable outcome**\n\nExample: “Redesigned the onboarding flow for 3,000 monthly users, reducing support requests by 22%.”\n\nStart by listing your three strongest projects, the problem in each, what you did, and the result.`;
+    const verb = pick(["Led", "Designed", "Improved", "Built", "Streamlined"], question);
+    return `## Resume improvement\n\nFor **${topic}**, turn your experience into evidence-based bullets.\n\nUse this format:\n\n> **${verb}** [project or responsibility] for [scope], resulting in [measurable outcome].\n\n### Example\n\n“${verb} a cross-functional onboarding redesign for 3,000 monthly users, improving activation by 18%.”\n\nSend me one of your existing bullets and I’ll rewrite it in this format.`;
   }
   if (/(interview|question|hiring)/.test(normalized)) {
-    return `## Interview practice\n\nUse the **STAR** structure for **${excerpt(question, 180)}**:\n\n- **Situation:** Set the context in one sentence.\n- **Task:** Explain your responsibility.\n- **Action:** Describe what *you* did.\n- **Result:** End with a measurable outcome or lesson.\n\nKeep your first answer to 60–90 seconds, then pause for a follow-up.`;
+    return `## Interview practice\n\nFor **${topic}**, use the **STAR** structure:\n\n- **Situation:** Set the context in one sentence.\n- **Task:** Explain your responsibility.\n- **Action:** Describe what *you* did.\n- **Result:** End with a measurable outcome or lesson.\n\n### Practice prompt\n\n“Tell me about a time you had to make a difficult decision related to ${topic}.”\n\nKeep your answer to 60–90 seconds, then identify one detail you would improve on the next attempt.`;
   }
-  return `## Action plan\n\nYou asked: **${excerpt(question, 240)}**\n\n1. Write the exact result you want by the end of today.\n2. Identify the single task with the largest impact.\n3. Block 25 minutes, remove distractions, and complete that task before planning the next one.\n\nIf you share your deadline and current situation, I can turn this into a more specific checklist.`;
+  const approach = pick(
+    [
+      "clarify the outcome",
+      "reduce the task to a first step",
+      "identify the highest-impact constraint",
+    ],
+    question,
+  );
+  return `## Action plan\n\nYou asked: **${excerpt(question, 240)}**\n\nFor this response, start by **${approach}**.\n\n1. State the exact result you want by the end of today.\n2. Write down the main obstacle and one way around it.\n3. Complete one 25-minute focused work block before planning more.\n\nReply with your deadline or current progress and I’ll make the next step more specific.`;
 }
