@@ -1,6 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useServerFn } from "@tanstack/react-start";
 import { useState } from "react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -17,7 +16,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Loader2, Sparkles, Copy, Trash2, Mail } from "lucide-react";
-import { generateCoverLetter } from "@/lib/ai.functions";
+import { createOfflineCoverLetter } from "@/lib/offline-assistant";
 import { MessageContent } from "@/components/chat/message-content";
 import { formatDistanceToNow } from "date-fns";
 
@@ -28,7 +27,6 @@ export const Route = createFileRoute("/_authenticated/cover-letter")({
 
 function CoverLetterPage() {
   const qc = useQueryClient();
-  const gen = useServerFn(generateCoverLetter);
   const [company, setCompany] = useState("");
   const [role, setRole] = useState("");
   const [jd, setJd] = useState("");
@@ -51,8 +49,21 @@ function CoverLetterPage() {
   });
 
   const mutation = useMutation({
-    mutationFn: async () =>
-      gen({ data: { company, role, jobDescription: jd, background: bg, tone } }),
+    mutationFn: async () => {
+      const content = createOfflineCoverLetter({
+        company,
+        role,
+        jobDescription: jd,
+        background: bg,
+      });
+      const { data, error } = await supabase
+        .from("cover_letters")
+        .insert({ company, role, content })
+        .select("id")
+        .single();
+      if (error) throw error;
+      return { id: data?.id, content };
+    },
     onSuccess: (res) => {
       setPreview(res.content);
       toast.success("Cover letter ready");

@@ -1,6 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useServerFn } from "@tanstack/react-start";
 import { useState } from "react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -17,7 +16,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Loader2, Sparkles, Download, Trash2, FileText } from "lucide-react";
-import { generateResume } from "@/lib/ai.functions";
+import { createOfflineResume } from "@/lib/offline-assistant";
 import { formatDistanceToNow } from "date-fns";
 
 export const Route = createFileRoute("/_authenticated/resume")({
@@ -38,7 +37,6 @@ type ResumeData = {
 
 function ResumePage() {
   const qc = useQueryClient();
-  const gen = useServerFn(generateResume);
   const [role, setRole] = useState("");
   const [targetJob, setTargetJob] = useState("");
   const [background, setBackground] = useState("");
@@ -60,7 +58,16 @@ function ResumePage() {
   });
 
   const mutation = useMutation({
-    mutationFn: async () => gen({ data: { role, targetJob, background, tone } }),
+    mutationFn: async () => {
+      const resume = createOfflineResume({ role, targetJob, background });
+      const { data, error } = await supabase
+        .from("resumes")
+        .insert({ title: `${resume.full_name} — ${role}`, target_role: role, data: resume })
+        .select("id")
+        .single();
+      if (error) throw error;
+      return { id: data?.id, resume };
+    },
     onSuccess: (res) => {
       toast.success("Resume ready");
       setPreview(res.resume as ResumeData);

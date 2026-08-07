@@ -1,6 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMutation } from "@tanstack/react-query";
-import { useServerFn } from "@tanstack/react-start";
 import { useState } from "react";
 import { toast } from "sonner";
 import { PageHeader } from "@/components/app/page-header";
@@ -26,7 +25,7 @@ import {
   Check,
   X,
 } from "lucide-react";
-import { generateStudyPack } from "@/lib/ai.functions";
+import { createOfflineStudyPack } from "@/lib/offline-assistant";
 import { MessageContent } from "@/components/chat/message-content";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
@@ -45,14 +44,20 @@ type Pack = {
 };
 
 function StudyPage() {
-  const gen = useServerFn(generateStudyPack);
   const [topic, setTopic] = useState("");
   const [level, setLevel] = useState<"beginner" | "intermediate" | "advanced">("intermediate");
   const [source, setSource] = useState("");
   const [pack, setPack] = useState<Pack | null>(null);
 
   const mutation = useMutation({
-    mutationFn: async () => gen({ data: { topic, level, source } }),
+    mutationFn: async () => {
+      const pack = createOfflineStudyPack({ topic, level, source });
+      await supabase
+        .from("flashcard_decks")
+        .insert({ title: pack.title, topic, cards: pack.flashcards });
+      await supabase.from("quizzes").insert({ title: pack.title, topic, questions: pack.quiz });
+      return { pack };
+    },
     onSuccess: (res) => {
       setPack(res.pack as Pack);
       toast.success("Study pack ready");

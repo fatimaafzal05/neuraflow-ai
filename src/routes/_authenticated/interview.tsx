@@ -1,6 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMutation } from "@tanstack/react-query";
-import { useServerFn } from "@tanstack/react-start";
 import { useState } from "react";
 import { toast } from "sonner";
 import { PageHeader } from "@/components/app/page-header";
@@ -16,7 +15,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Loader2, Mic, Play, Send, RotateCcw, Save } from "lucide-react";
-import { interviewTurn, saveInterview } from "@/lib/ai.functions";
+import { createOfflineInterviewTurn } from "@/lib/offline-assistant";
+import { supabase } from "@/integrations/supabase/client";
 import { MessageContent } from "@/components/chat/message-content";
 
 export const Route = createFileRoute("/_authenticated/interview")({
@@ -28,8 +28,6 @@ type Turn = { role: "interviewer" | "candidate"; text: string };
 type Feedback = { text: string; score: number };
 
 function InterviewPage() {
-  const turnFn = useServerFn(interviewTurn);
-  const saveFn = useServerFn(saveInterview);
   const [role, setRole] = useState("Software Engineer");
   const [level, setLevel] = useState<"junior" | "mid" | "senior">("mid");
   const [started, setStarted] = useState(false);
@@ -40,7 +38,7 @@ function InterviewPage() {
   const [finalSummary, setFinalSummary] = useState("");
 
   const turn = useMutation({
-    mutationFn: async (t: Turn[]) => turnFn({ data: { role, level, transcript: t } }),
+    mutationFn: async (t: Turn[]) => createOfflineInterviewTurn({ role, level, transcript: t }),
     onError: (e: Error) => toast.error(e.message),
   });
 
@@ -49,7 +47,13 @@ function InterviewPage() {
       const overall = feedback.length
         ? Math.round((feedback.reduce((n, f) => n + f.score, 0) / feedback.length) * 10) / 10
         : 0;
-      return saveFn({ data: { role, transcript, overallScore: overall, feedback: finalSummary } });
+      const { data, error } = await supabase
+        .from("interview_sessions")
+        .insert({ role, transcript, overall_score: overall, feedback: finalSummary })
+        .select("id")
+        .single();
+      if (error) throw error;
+      return data;
     },
     onSuccess: () => toast.success("Interview saved"),
     onError: (e: Error) => toast.error(e.message),

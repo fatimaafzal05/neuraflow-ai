@@ -1,6 +1,6 @@
 # NeuraFlow AI
 
-NeuraFlow AI is a focused workspace for career preparation, interview practice, study support, and everyday productivity. It pairs a polished React interface with secure Supabase authentication and persistence.
+NeuraFlow AI is a focused workspace for career preparation, interview practice, study support, and everyday productivity. It runs entirely in guest mode, keeping your session and saved work in the current browser.
 
 ## What you can do
 
@@ -26,7 +26,7 @@ The app selects cloud AI automatically when the key is available; otherwise it r
 
 - **App:** TanStack Start, React 19, TypeScript, Vite
 - **UI:** Tailwind CSS v4, shadcn/ui, Motion, Lucide
-- **Data and auth:** Supabase Postgres, Auth, Row Level Security
+- **Data and auth:** Browser local storage and guest sessions
 - **State:** TanStack Query and Zustand
 - **AI:** Vercel AI SDK with an optional Lovable/Gemini provider and a built-in offline fallback
 
@@ -35,7 +35,6 @@ The app selects cloud AI automatically when the key is available; otherwise it r
 ### Prerequisites
 
 - Node.js 20 or newer
-- A Supabase project for authentication and saved data
 
 ### Install and run
 
@@ -53,22 +52,7 @@ On macOS or Linux, use this instead of `copy`:
 cp .env.example .env
 ```
 
-### Environment configuration
-
-Configure the Supabase values in `.env`:
-
-```env
-SUPABASE_URL=https://your-project.supabase.co
-SUPABASE_PUBLISHABLE_KEY=sb_publishable_your_public_key
-VITE_SUPABASE_URL=https://your-project.supabase.co
-VITE_SUPABASE_PUBLISHABLE_KEY=sb_publishable_your_public_key
-VITE_SUPABASE_PROJECT_ID=your-project-id
-
-# Optional: enables cloud-generated AI responses
-LOVABLE_API_KEY=
-```
-
-`.env` is intentionally ignored by Git. The Lovable key is server-only; never expose or commit it.
+No environment variables are required for guest mode.
 
 ## Quality checks
 
@@ -95,11 +79,11 @@ supabase/migrations/          Schema, RLS policies, roles, and triggers
 
 ## Security and data
 
-All user-owned records are protected with Supabase Row Level Security. AI chat routes verify the active Supabase session before serving a response. Cloud mode also enforces the per-profile AI usage limit.
+Guest-mode data is stored in the browser only. Clearing browser storage or switching browsers removes access to it. Do not store sensitive personal data in the app.
 
 ## Deployment
 
-Deploy through Lovable, or use a Cloudflare Workers-compatible platform after running `npm run build`. Configure the same environment variables in the deployment provider.
+Deploy to any compatible hosting provider after running `npm run build`. Each browser keeps its own local guest workspace.
 
 ## License
 
