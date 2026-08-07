@@ -1,87 +1,105 @@
 # NeuraFlow AI
 
-Production-ready AI productivity suite: streaming chat, resume & cover-letter generator, interview coach, study assistant (notes, flashcards, quizzes), prompt library, and an admin dashboard.
+NeuraFlow AI is a focused workspace for career preparation, interview practice, study support, and everyday productivity. It pairs a polished React interface with secure Supabase authentication and persistence.
 
-## Stack
+## What you can do
 
-- **Framework:** TanStack Start v1 (React 19, Vite 7, SSR on Cloudflare Workers)
-- **Styling:** Tailwind CSS v4 + shadcn/ui, dark premium theme
-- **Backend:** Lovable Cloud (Supabase) — Postgres, Auth (email + Google OAuth), RLS
-- **AI:** Lovable AI Gateway (Google Gemini 2.5 Flash) via Vercel AI SDK
-- **State/Data:** TanStack Query, Zustand
-- **Charts / UX:** Recharts, motion/react, sonner, react-markdown + rehype-highlight
+- Chat with a practical career and productivity assistant
+- Create, preview, download, and save targeted resumes
+- Draft tailored cover letters
+- Run a five-question mock interview with feedback and scoring
+- Generate study notes, flashcards, and quizzes
+- Save reusable prompts and review activity from a personal dashboard
 
-## Local development
+## AI modes
+
+NeuraFlow works in either of these modes:
+
+| Mode              | Setup                               | Behaviour                                                                                     |
+| ----------------- | ----------------------------------- | --------------------------------------------------------------------------------------------- |
+| Offline (default) | No AI key required                  | Provides instant, template-based chat and generation features. Ideal for demos and local use. |
+| Cloud AI          | Set `LOVABLE_API_KEY` on the server | Uses Google Gemini 2.5 Flash through the Lovable AI Gateway for generated responses.          |
+
+The app selects cloud AI automatically when the key is available; otherwise it remains fully usable in offline mode. API requests require an authenticated user in either mode.
+
+## Technology
+
+- **App:** TanStack Start, React 19, TypeScript, Vite
+- **UI:** Tailwind CSS v4, shadcn/ui, Motion, Lucide
+- **Data and auth:** Supabase Postgres, Auth, Row Level Security
+- **State:** TanStack Query and Zustand
+- **AI:** Vercel AI SDK with an optional Lovable/Gemini provider and a built-in offline fallback
+
+## Getting started
+
+### Prerequisites
+
+- Node.js 20 or newer
+- A Supabase project for authentication and saved data
+
+### Install and run
 
 ```bash
-bun install
-bun run dev        # http://localhost:8080
-bun run build
+npm install
+copy .env.example .env
+npm run dev
 ```
 
-### Environment variables
+Open the local address printed by Vite (normally `http://localhost:8080`).
 
-Copy `.env.example` to `.env` and set:
+On macOS or Linux, use this instead of `copy`:
 
-```
-SUPABASE_URL=...
-SUPABASE_PUBLISHABLE_KEY=...
-VITE_SUPABASE_URL=...
-VITE_SUPABASE_PUBLISHABLE_KEY=...
-VITE_SUPABASE_PROJECT_ID=...
-LOVABLE_API_KEY=...            # optional, server-only, for cloud AI responses
+```bash
+cp .env.example .env
 ```
 
-Never commit `.env`. The publishable Supabase values may be exposed to the browser, but the
-Lovable API key must remain server-only.
+### Environment configuration
 
-Without `LOVABLE_API_KEY`, the app runs in built-in offline mode: chat, resume, cover letter,
-study, and interview features remain usable with local template-based responses. Add the key
-later to switch those features to cloud-generated responses automatically.
+Configure the Supabase values in `.env`:
 
-## Project structure
+```env
+SUPABASE_URL=https://your-project.supabase.co
+SUPABASE_PUBLISHABLE_KEY=sb_publishable_your_public_key
+VITE_SUPABASE_URL=https://your-project.supabase.co
+VITE_SUPABASE_PUBLISHABLE_KEY=sb_publishable_your_public_key
+VITE_SUPABASE_PROJECT_ID=your-project-id
 
+# Optional: enables cloud-generated AI responses
+LOVABLE_API_KEY=
 ```
+
+`.env` is intentionally ignored by Git. The Lovable key is server-only; never expose or commit it.
+
+## Quality checks
+
+```bash
+npm run lint
+npx tsc --noEmit
+npm run build
+```
+
+## Project layout
+
+```text
 src/
-  routes/                # File-based routing
-    __root.tsx           # Root layout, head metadata, Toaster
-    index.tsx            # Marketing landing page
-    auth.tsx             # Sign in / sign up (email + Google)
-    reset-password.tsx
-    _authenticated/      # Auth-gated app shell
-      route.tsx          # Sidebar shell + session guard
-      dashboard.tsx
-      chat.tsx           # Streaming AI chat
-      resume.tsx         # AI resume builder
-      cover-letter.tsx   # Cover letter generator
-      interview.tsx      # Mock interview coach
-      study.tsx          # Notes, flashcards, quiz
-      prompts.tsx        # Prompt library
-      settings.tsx
-      admin.tsx          # Admin-only overview
-    api/
-      chat.ts            # Streaming chat endpoint
-  components/            # UI + feature components (shadcn/ui + brand/*)
-  integrations/supabase/ # Generated client + auth middleware
+  routes/                     Pages, route guards, and the chat API
+    _authenticated/           Signed-in workspace
+  components/                 Brand, app, marketing, and UI components
+  integrations/supabase/      Supabase clients and auth middleware
   lib/
-    ai-gateway.server.ts # Lovable AI Gateway provider
-    ai.functions.ts      # Server functions: resume, cover, study, interview
-supabase/migrations/     # Schema, RLS policies, triggers
+    ai.functions.ts           Server-side generators and persistence
+    offline-assistant.server.ts Credential-free fallback assistant
+    ai-gateway.server.ts      Optional cloud AI provider
+supabase/migrations/          Schema, RLS policies, roles, and triggers
 ```
 
-## Database
+## Security and data
 
-11 tables with RLS: `profiles`, `user_roles`, `chats`, `messages`, `resumes`,
-`cover_letters`, `flashcard_decks`, `quizzes`, `quiz_attempts`,
-`interview_sessions`, `saved_prompts`, `activity_logs`.
+All user-owned records are protected with Supabase Row Level Security. AI chat routes verify the active Supabase session before serving a response. Cloud mode also enforces the per-profile AI usage limit.
 
-Roles are stored in `user_roles` and checked via the `has_role()`
-security-definer function.
+## Deployment
 
-## Deploy
-
-Publish through Lovable, or push the repo to GitHub and deploy to any
-Cloudflare Workers–compatible host. `bun run build` emits the SSR bundle.
+Deploy through Lovable, or use a Cloudflare Workers-compatible platform after running `npm run build`. Configure the same environment variables in the deployment provider.
 
 ## License
 
