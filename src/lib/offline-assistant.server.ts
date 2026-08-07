@@ -151,5 +151,17 @@ export function createOfflineChatReply(messages: UIMessage[]) {
     .map((part) => part.text)
     .join(" ")
     .trim();
-  return `## Practical next steps\n\n${prompt ? `You asked: **${excerpt(prompt, 300)}**` : "Tell me what you are working on."}\n\n1. Define the outcome you want in one sentence.\n2. List the two most important constraints.\n3. Take the smallest concrete next action, then review the result.\n\n*Offline assistant mode is active. Add a Lovable API key later for fully generative responses.*`;
+  const question = prompt || "Tell me what you are working on.";
+  const normalized = question.toLowerCase();
+
+  if (/(exam|study|learn|certif|aws)/.test(normalized)) {
+    return `## Study plan\n\nFor **${excerpt(question, 180)}**, focus on active recall and short daily practice.\n\n### This week\n\n1. Break the syllabus into 5–7 topics and study one per day.\n2. Make 5 flashcards after each session.\n3. End every session with 10 practice questions.\n\n### Next week\n\n1. Revisit weak topics first.\n2. Complete two timed practice sets.\n3. Write a one-page cheat sheet from memory, then correct it.\n\n**Today’s first step:** choose the first topic and spend 15 minutes outlining what you already know.`;
+  }
+  if (/(resume|cv|linkedin|job application)/.test(normalized)) {
+    return `## Resume improvement\n\nFor **${excerpt(question, 180)}**, make each bullet follow this pattern:\n\n**Action + scope + measurable outcome**\n\nExample: “Redesigned the onboarding flow for 3,000 monthly users, reducing support requests by 22%.”\n\nStart by listing your three strongest projects, the problem in each, what you did, and the result.`;
+  }
+  if (/(interview|question|hiring)/.test(normalized)) {
+    return `## Interview practice\n\nUse the **STAR** structure for **${excerpt(question, 180)}**:\n\n- **Situation:** Set the context in one sentence.\n- **Task:** Explain your responsibility.\n- **Action:** Describe what *you* did.\n- **Result:** End with a measurable outcome or lesson.\n\nKeep your first answer to 60–90 seconds, then pause for a follow-up.`;
+  }
+  return `## Action plan\n\nYou asked: **${excerpt(question, 240)}**\n\n1. Write the exact result you want by the end of today.\n2. Identify the single task with the largest impact.\n3. Block 25 minutes, remove distractions, and complete that task before planning the next one.\n\nIf you share your deadline and current situation, I can turn this into a more specific checklist.`;
 }
