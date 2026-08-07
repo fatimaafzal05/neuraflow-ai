@@ -11,10 +11,7 @@ import { Loader2 } from "lucide-react";
 
 export const Route = createFileRoute("/reset-password")({
   head: () => ({
-    meta: [
-      { title: "Reset password · NeuraFlow AI" },
-      { name: "robots", content: "noindex" },
-    ],
+    meta: [{ title: "Reset password · NeuraFlow AI" }, { name: "robots", content: "noindex" }],
   }),
   component: ResetPasswordPage,
 });
@@ -46,7 +43,10 @@ function ResetPasswordPage() {
 
   return (
     <div className="relative flex min-h-screen items-center justify-center px-4 py-10">
-      <div className="pointer-events-none absolute inset-0 -z-10" style={{ background: "var(--gradient-hero)" }} />
+      <div
+        className="pointer-events-none absolute inset-0 -z-10"
+        style={{ background: "var(--gradient-hero)" }}
+      />
       <div className="w-full max-w-md">
         <div className="mb-6 flex justify-center">
           <Link to="/">
@@ -56,7 +56,9 @@ function ResetPasswordPage() {
         <div className="glass rounded-2xl p-6 shadow-elevated sm:p-8">
           <h1 className="font-display text-2xl tracking-tight">Set a new password</h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            {ready ? "Choose a strong password of at least 8 characters." : "Open this page from the password reset email link."}
+            {ready
+              ? "Choose a strong password of at least 8 characters."
+              : "Open this page from the password reset email link."}
           </p>
           <form onSubmit={submit} className="mt-5 space-y-4">
             <div className="space-y-2">

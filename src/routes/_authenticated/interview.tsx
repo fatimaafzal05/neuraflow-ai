@@ -8,7 +8,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Loader2, Mic, Play, Send, RotateCcw, Save } from "lucide-react";
 import { interviewTurn, saveInterview } from "@/lib/ai.functions";
 import { MessageContent } from "@/components/chat/message-content";
@@ -78,18 +84,30 @@ function InterviewPage() {
 
   return (
     <div>
-      <PageHeader title="Interview Coach" description="Live mock interviews with honest feedback." />
+      <PageHeader
+        title="Interview Coach"
+        description="Live mock interviews with honest feedback."
+      />
       <div className="grid gap-6 p-6 sm:p-8 lg:grid-cols-[360px_1fr]">
         <section className="rounded-2xl border border-border bg-card/40 p-6 backdrop-blur">
           <h2 className="font-display text-xl tracking-tight">Setup</h2>
           <div className="mt-5 space-y-4">
             <div>
               <Label>Role</Label>
-              <Input value={role} onChange={(e) => setRole(e.target.value)} className="mt-1.5" disabled={started && !done} />
+              <Input
+                value={role}
+                onChange={(e) => setRole(e.target.value)}
+                className="mt-1.5"
+                disabled={started && !done}
+              />
             </div>
             <div>
               <Label>Level</Label>
-              <Select value={level} onValueChange={(v) => setLevel(v as typeof level)} disabled={started && !done}>
+              <Select
+                value={level}
+                onValueChange={(v) => setLevel(v as typeof level)}
+                disabled={started && !done}
+              >
                 <SelectTrigger className="mt-1.5">
                   <SelectValue />
                 </SelectTrigger>
@@ -125,7 +143,11 @@ function InterviewPage() {
                 variant="secondary"
                 className="w-full"
               >
-                {save.isPending ? <Loader2 className="mr-2 size-4 animate-spin" /> : <Save className="mr-2 size-4" />}
+                {save.isPending ? (
+                  <Loader2 className="mr-2 size-4 animate-spin" />
+                ) : (
+                  <Save className="mr-2 size-4" />
+                )}
                 Save session
               </Button>
             )}
@@ -142,11 +164,14 @@ function InterviewPage() {
             <div className="flex h-full flex-col">
               <div className="flex-1 space-y-4 overflow-y-auto pr-2">
                 {transcript.map((t, i) => {
-                  const fbIndex = t.role === "candidate" ? countTo(transcript, "candidate", i) - 1 : -1;
+                  const fbIndex =
+                    t.role === "candidate" ? countTo(transcript, "candidate", i) - 1 : -1;
                   const fb = fbIndex >= 0 ? feedback[fbIndex] : null;
                   return (
                     <div key={i}>
-                      <div className={`rounded-2xl border p-4 text-sm ${t.role === "interviewer" ? "border-border bg-background" : "border-brand/30 bg-brand/5 ml-8"}`}>
+                      <div
+                        className={`rounded-2xl border p-4 text-sm ${t.role === "interviewer" ? "border-border bg-background" : "border-brand/30 bg-brand/5 ml-8"}`}
+                      >
                         <div className="mb-1 text-xs uppercase tracking-widest text-muted-foreground">
                           {t.role === "interviewer" ? "Interviewer" : "You"}
                         </div>
@@ -155,7 +180,9 @@ function InterviewPage() {
                       {fb && (
                         <div className="ml-8 mt-2 rounded-xl border border-border/60 bg-card/40 p-3 text-xs text-muted-foreground">
                           <div className="mb-1 flex items-center gap-2">
-                            <span className="font-semibold text-foreground">Score: {fb.score}/10</span>
+                            <span className="font-semibold text-foreground">
+                              Score: {fb.score}/10
+                            </span>
                           </div>
                           {fb.text}
                         </div>
@@ -165,7 +192,9 @@ function InterviewPage() {
                 })}
                 {done && finalSummary && (
                   <div className="rounded-2xl border border-brand/40 bg-brand/5 p-4">
-                    <div className="mb-2 text-xs font-semibold uppercase tracking-widest text-brand-glow">Final feedback</div>
+                    <div className="mb-2 text-xs font-semibold uppercase tracking-widest text-brand-glow">
+                      Final feedback
+                    </div>
                     <MessageContent text={finalSummary} />
                   </div>
                 )}

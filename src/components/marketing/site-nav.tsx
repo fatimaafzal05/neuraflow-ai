@@ -29,7 +29,11 @@ export function SiteNav() {
         <Button asChild variant="ghost" size="sm" className="hidden sm:inline-flex">
           <Link to="/auth">Sign in</Link>
         </Button>
-        <Button asChild size="sm" className="rounded-full bg-foreground text-background hover:bg-foreground/90">
+        <Button
+          asChild
+          size="sm"
+          className="rounded-full bg-foreground text-background hover:bg-foreground/90"
+        >
           <Link to="/dashboard">Open app</Link>
         </Button>
       </div>

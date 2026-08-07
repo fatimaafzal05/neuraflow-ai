@@ -86,13 +86,29 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       },
       { name: "theme-color", content: "#1a1530" },
       { property: "og:title", content: "NeuraFlow AI — Your AI Career & Productivity Copilot" },
-      { property: "og:description", content: "NeuraFlow AI helps students, freelancers, and professionals write resumes, ace interviews, master study material, and get more done — with a single fast copilot." },
+      {
+        property: "og:description",
+        content:
+          "NeuraFlow AI helps students, freelancers, and professionals write resumes, ace interviews, master study material, and get more done — with a single fast copilot.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:title", content: "NeuraFlow AI — Your AI Career & Productivity Copilot" },
-      { name: "twitter:description", content: "NeuraFlow AI helps students, freelancers, and professionals write resumes, ace interviews, master study material, and get more done — with a single fast copilot." },
-      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/2cbf1ccb-d69f-426f-8be9-5d6bcc7b70eb/id-preview-e50f0b92--a6146fad-0cc2-4532-8305-b9bb55135bae.lovable.app-1784116268542.png" },
-      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/2cbf1ccb-d69f-426f-8be9-5d6bcc7b70eb/id-preview-e50f0b92--a6146fad-0cc2-4532-8305-b9bb55135bae.lovable.app-1784116268542.png" },
+      {
+        name: "twitter:description",
+        content:
+          "NeuraFlow AI helps students, freelancers, and professionals write resumes, ace interviews, master study material, and get more done — with a single fast copilot.",
+      },
+      {
+        property: "og:image",
+        content:
+          "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/2cbf1ccb-d69f-426f-8be9-5d6bcc7b70eb/id-preview-e50f0b92--a6146fad-0cc2-4532-8305-b9bb55135bae.lovable.app-1784116268542.png",
+      },
+      {
+        name: "twitter:image",
+        content:
+          "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/2cbf1ccb-d69f-426f-8be9-5d6bcc7b70eb/id-preview-e50f0b92--a6146fad-0cc2-4532-8305-b9bb55135bae.lovable.app-1784116268542.png",
+      },
     ],
     links: [
       { rel: "stylesheet", href: appCss },

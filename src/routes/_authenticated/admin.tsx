@@ -7,7 +7,9 @@ import { Users, MessageSquare, FileText, TrendingUp } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 
 export const Route = createFileRoute("/_authenticated/admin")({
-  head: () => ({ meta: [{ title: "Admin · NeuraFlow AI" }, { name: "robots", content: "noindex" }] }),
+  head: () => ({
+    meta: [{ title: "Admin · NeuraFlow AI" }, { name: "robots", content: "noindex" }],
+  }),
   beforeLoad: async () => {
     const { data: userData } = await supabase.auth.getUser();
     if (!userData.user) throw redirect({ to: "/auth" });
@@ -22,12 +24,22 @@ function AdminPage() {
     queryKey: ["admin-overview"],
     queryFn: async () => {
       const [users, chats, resumes, activity] = await Promise.all([
-        supabase.from("profiles").select("id, email, display_name, plan, ai_messages_used, ai_messages_limit, created_at").order("created_at", { ascending: false }).limit(50),
+        supabase
+          .from("profiles")
+          .select("id, email, display_name, plan, ai_messages_used, ai_messages_limit, created_at")
+          .order("created_at", { ascending: false })
+          .limit(50),
         supabase.from("chats").select("id", { count: "exact", head: true }),
         supabase.from("resumes").select("id", { count: "exact", head: true }),
-        supabase.from("activity_logs").select("id, user_id, action, resource_type, created_at").order("created_at", { ascending: false }).limit(30),
+        supabase
+          .from("activity_logs")
+          .select("id, user_id, action, resource_type, created_at")
+          .order("created_at", { ascending: false })
+          .limit(30),
       ]);
-      const { count: userCount } = await supabase.from("profiles").select("id", { count: "exact", head: true });
+      const { count: userCount } = await supabase
+        .from("profiles")
+        .select("id", { count: "exact", head: true });
       return {
         userCount: userCount ?? 0,
         chatCount: chats.count ?? 0,
@@ -50,9 +62,14 @@ function AdminPage() {
       <PageHeader title="Admin" description="Users, activity, and platform health." />
       <div className="grid gap-4 p-6 sm:p-8 sm:grid-cols-2 lg:grid-cols-4">
         {stats.map((s) => (
-          <div key={s.label} className="rounded-2xl border border-border bg-card/40 p-5 backdrop-blur">
+          <div
+            key={s.label}
+            className="rounded-2xl border border-border bg-card/40 p-5 backdrop-blur"
+          >
             <div className="flex items-center justify-between">
-              <span className="text-xs uppercase tracking-widest text-muted-foreground">{s.label}</span>
+              <span className="text-xs uppercase tracking-widest text-muted-foreground">
+                {s.label}
+              </span>
               <s.icon className="size-4 text-brand-glow" />
             </div>
             <div className="mt-2 font-display text-3xl tracking-tight">{s.value}</div>
@@ -93,7 +110,8 @@ function AdminPage() {
                 <div>
                   <div className="font-medium">{a.action}</div>
                   <div className="text-xs text-muted-foreground">
-                    {a.resource_type ?? "—"} · {formatDistanceToNow(new Date(a.created_at), { addSuffix: true })}
+                    {a.resource_type ?? "—"} ·{" "}
+                    {formatDistanceToNow(new Date(a.created_at), { addSuffix: true })}
                   </div>
                 </div>
               </div>

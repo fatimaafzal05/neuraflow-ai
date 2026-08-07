@@ -57,7 +57,10 @@ export function AppShell({ children }: { children: ReactNode }) {
 
       {mobileOpen && (
         <div className="fixed inset-0 z-50 md:hidden">
-          <div className="absolute inset-0 bg-background/80 backdrop-blur" onClick={() => setMobileOpen(false)} />
+          <div
+            className="absolute inset-0 bg-background/80 backdrop-blur"
+            onClick={() => setMobileOpen(false)}
+          />
           <aside className="absolute inset-y-0 left-0 flex w-72 flex-col border-r border-border bg-card">
             <SidebarContents />
           </aside>
@@ -84,12 +87,19 @@ function SidebarContents() {
     queryFn: async () => {
       const { data: userData } = await supabase.auth.getUser();
       if (!userData.user) return false;
-      const { data } = await supabase.rpc("has_role", { _user_id: userData.user.id, _role: "admin" });
+      const { data } = await supabase.rpc("has_role", {
+        _user_id: userData.user.id,
+        _role: "admin",
+      });
       return Boolean(data);
     },
   });
   const items = isAdmin
-    ? [...NAV.slice(0, -1), { to: "/admin" as const, label: "Admin", icon: Shield }, NAV[NAV.length - 1]]
+    ? [
+        ...NAV.slice(0, -1),
+        { to: "/admin" as const, label: "Admin", icon: Shield },
+        NAV[NAV.length - 1],
+      ]
     : NAV;
   return (
     <>
@@ -138,7 +148,12 @@ function UsageMeter() {
       </div>
       <Progress value={pct} className="mt-2 h-1.5" />
       {profile?.plan === "free" && (
-        <Button asChild size="sm" variant="ghost" className="mt-2 h-7 w-full justify-start gap-1.5 text-xs text-brand-glow hover:text-brand-glow">
+        <Button
+          asChild
+          size="sm"
+          variant="ghost"
+          className="mt-2 h-7 w-full justify-start gap-1.5 text-xs text-brand-glow hover:text-brand-glow"
+        >
           <Link to="/settings">
             <Sparkles className="size-3" /> Upgrade to Pro
           </Link>
@@ -174,7 +189,9 @@ function UserMenu() {
             </Avatar>
             <div className="min-w-0 flex-1">
               <div className="truncate text-sm font-medium">{name}</div>
-              <div className="truncate text-xs capitalize text-muted-foreground">{profile?.plan ?? "free"} plan</div>
+              <div className="truncate text-xs capitalize text-muted-foreground">
+                {profile?.plan ?? "free"} plan
+              </div>
             </div>
             <ChevronsUpDown className="size-4 text-muted-foreground" />
           </button>

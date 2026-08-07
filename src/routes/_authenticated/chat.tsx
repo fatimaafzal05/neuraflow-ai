@@ -16,14 +16,44 @@ export const Route = createFileRoute("/_authenticated/chat")({
 });
 
 const STARTERS = [
-  { title: "Rewrite my LinkedIn bio", prompt: "Rewrite my LinkedIn bio to sound confident and specific. I'm a product designer with 6 years in B2B SaaS." },
-  { title: "Draft a cover letter", prompt: "Draft a cover letter for a Senior Frontend Engineer role at a fintech startup. Highlight React, TypeScript, and shipping speed." },
-  { title: "2-week study plan", prompt: "Build a 2-week study plan for the AWS Solutions Architect Associate exam. I have 1 hour a day." },
-  { title: "Explain a hard concept", prompt: "Explain how JWTs work with a real analogy and a small TypeScript example." },
+  {
+    title: "Rewrite my LinkedIn bio",
+    prompt:
+      "Rewrite my LinkedIn bio to sound confident and specific. I'm a product designer with 6 years in B2B SaaS.",
+  },
+  {
+    title: "Draft a cover letter",
+    prompt:
+      "Draft a cover letter for a Senior Frontend Engineer role at a fintech startup. Highlight React, TypeScript, and shipping speed.",
+  },
+  {
+    title: "2-week study plan",
+    prompt:
+      "Build a 2-week study plan for the AWS Solutions Architect Associate exam. I have 1 hour a day.",
+  },
+  {
+    title: "Explain a hard concept",
+    prompt: "Explain how JWTs work with a real analogy and a small TypeScript example.",
+  },
 ];
 
 function ChatPage() {
-  const transport = useMemo(() => new DefaultChatTransport({ api: "/api/chat" }), []);
+  const transport = useMemo(
+    () =>
+      new DefaultChatTransport({
+        api: "/api/chat",
+        prepareSendMessagesRequest: async ({ id, messages, body, trigger, messageId }) => {
+          const { data } = await supabase.auth.getSession();
+          return data.session?.access_token
+            ? {
+                body: { ...body, id, messages, trigger, messageId },
+                headers: { Authorization: `Bearer ${data.session.access_token}` },
+              }
+            : { body: { ...body, id, messages, trigger, messageId } };
+        },
+      }),
+    [],
+  );
   const [input, setInput] = useState("");
   const { messages, sendMessage, status, stop, setMessages } = useChat({
     transport,
@@ -80,16 +110,27 @@ function ChatPage() {
               {messages.map((m) => {
                 const text = m.parts.map((p) => (p.type === "text" ? p.text : "")).join("");
                 return (
-                  <div key={m.id} className={cn("flex gap-3", m.role === "user" ? "justify-end" : "justify-start")}>
+                  <div
+                    key={m.id}
+                    className={cn(
+                      "flex gap-3",
+                      m.role === "user" ? "justify-end" : "justify-start",
+                    )}
+                  >
                     {m.role === "assistant" && (
-                      <div className="mt-1 flex size-7 shrink-0 items-center justify-center rounded-lg" style={{ background: "var(--gradient-brand)" }}>
+                      <div
+                        className="mt-1 flex size-7 shrink-0 items-center justify-center rounded-lg"
+                        style={{ background: "var(--gradient-brand)" }}
+                      >
                         <Sparkles className="size-3.5 text-brand-foreground" />
                       </div>
                     )}
                     <div
                       className={cn(
                         "max-w-[85%] rounded-2xl px-4 py-3 text-[15px] leading-relaxed",
-                        m.role === "user" ? "bg-secondary text-foreground rounded-br-md" : "glass rounded-bl-md",
+                        m.role === "user"
+                          ? "bg-secondary text-foreground rounded-br-md"
+                          : "glass rounded-bl-md",
                       )}
                     >
                       {m.role === "user" ? (
@@ -103,7 +144,10 @@ function ChatPage() {
               })}
               {status === "submitted" && (
                 <div className="flex gap-3">
-                  <div className="mt-1 flex size-7 shrink-0 items-center justify-center rounded-lg" style={{ background: "var(--gradient-brand)" }}>
+                  <div
+                    className="mt-1 flex size-7 shrink-0 items-center justify-center rounded-lg"
+                    style={{ background: "var(--gradient-brand)" }}
+                  >
                     <Sparkles className="size-3.5 text-brand-foreground animate-pulse" />
                   </div>
                   <div className="glass flex items-center gap-1.5 rounded-2xl rounded-bl-md px-4 py-3">

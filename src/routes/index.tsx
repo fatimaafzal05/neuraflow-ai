@@ -28,7 +28,8 @@ export const Route = createFileRoute("/")({
       { property: "og:title", content: "NeuraFlow AI — Your AI Career & Productivity Copilot" },
       {
         property: "og:description",
-        content: "NeuraFlow AI helps students, freelancers, and professionals write resumes, ace interviews, master study material, and get more done — with a single fast copilot.",
+        content:
+          "NeuraFlow AI helps students, freelancers, and professionals write resumes, ace interviews, master study material, and get more done — with a single fast copilot.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -83,8 +84,7 @@ function Hero() {
         transition={{ duration: 0.6, delay: 0.05 }}
         className="mt-6 font-display text-5xl leading-[1.05] tracking-tight sm:text-7xl"
       >
-        Your AI career &{" "}
-        <span className="italic text-gradient">productivity copilot</span>
+        Your AI career & <span className="italic text-gradient">productivity copilot</span>
       </motion.h1>
 
       <motion.p
@@ -103,7 +103,11 @@ function Hero() {
         transition={{ duration: 0.6, delay: 0.15 }}
         className="mt-8 flex flex-wrap items-center justify-center gap-3"
       >
-        <Button asChild size="lg" className="h-11 rounded-full bg-foreground px-6 text-background hover:bg-foreground/90">
+        <Button
+          asChild
+          size="lg"
+          className="h-11 rounded-full bg-foreground px-6 text-background hover:bg-foreground/90"
+        >
           <Link to="/chat">
             Start for free <ArrowRight className="ml-1 size-4" />
           </Link>
@@ -134,14 +138,18 @@ function Hero() {
                 </div>
               </div>
               <div className="flex gap-3">
-                <div className="mt-0.5 flex size-7 shrink-0 items-center justify-center rounded-lg" style={{ background: "var(--gradient-brand)" }}>
+                <div
+                  className="mt-0.5 flex size-7 shrink-0 items-center justify-center rounded-lg"
+                  style={{ background: "var(--gradient-brand)" }}
+                >
                   <Sparkles className="size-3.5 text-brand-foreground" />
                 </div>
                 <div className="glass max-w-[85%] rounded-2xl rounded-bl-md px-4 py-3 text-sm leading-relaxed">
                   <p className="text-muted-foreground">
-                    <span className="text-foreground">Senior Product Manager</span> with 8+ years shipping payments infrastructure
-                    at hyper-growth fintechs. Led a 12-person pod that grew ARR from $4M → $28M in 18
-                    months by rebuilding onboarding and launching embedded ledgers…
+                    <span className="text-foreground">Senior Product Manager</span> with 8+ years
+                    shipping payments infrastructure at hyper-growth fintechs. Led a 12-person pod
+                    that grew ARR from $4M → $28M in 18 months by rebuilding onboarding and
+                    launching embedded ledgers…
                   </p>
                   <div className="mt-2 inline-flex h-2 w-1.5 animate-pulse bg-foreground" />
                 </div>
@@ -175,12 +183,36 @@ function LogoStrip() {
 }
 
 const FEATURES = [
-  { icon: MessageSquare, title: "Streaming AI Chat", desc: "Fast, markdown-rich answers with code highlighting. Feels alive." },
-  { icon: FileText, title: "Resume & Cover Letters", desc: "ATS-friendly resumes generated, analyzed, and improved in seconds." },
-  { icon: GraduationCap, title: "Study Assistant", desc: "Notes, flashcards, and quizzes from any PDF or topic." },
-  { icon: Zap, title: "Interview Coach", desc: "Mock interviews with instant, honest feedback tuned to your role." },
-  { icon: BarChart3, title: "Analytics & Usage", desc: "See where your time and prompts go. Get better every week." },
-  { icon: Shield, title: "Private by default", desc: "Your data is yours. Encrypted at rest, never used to train models." },
+  {
+    icon: MessageSquare,
+    title: "Streaming AI Chat",
+    desc: "Fast, markdown-rich answers with code highlighting. Feels alive.",
+  },
+  {
+    icon: FileText,
+    title: "Resume & Cover Letters",
+    desc: "ATS-friendly resumes generated, analyzed, and improved in seconds.",
+  },
+  {
+    icon: GraduationCap,
+    title: "Study Assistant",
+    desc: "Notes, flashcards, and quizzes from any PDF or topic.",
+  },
+  {
+    icon: Zap,
+    title: "Interview Coach",
+    desc: "Mock interviews with instant, honest feedback tuned to your role.",
+  },
+  {
+    icon: BarChart3,
+    title: "Analytics & Usage",
+    desc: "See where your time and prompts go. Get better every week.",
+  },
+  {
+    icon: Shield,
+    title: "Private by default",
+    desc: "Your data is yours. Encrypted at rest, never used to train models.",
+  },
 ];
 
 function Features() {
@@ -206,8 +238,10 @@ function Features() {
             transition={{ duration: 0.5, delay: i * 0.05 }}
             className="group relative overflow-hidden rounded-2xl border border-border bg-card/40 p-6 backdrop-blur transition-colors hover:border-brand/40"
           >
-            <div className="absolute -right-8 -top-8 size-32 rounded-full opacity-0 blur-2xl transition-opacity group-hover:opacity-60"
-              style={{ background: "var(--gradient-brand)" }} />
+            <div
+              className="absolute -right-8 -top-8 size-32 rounded-full opacity-0 blur-2xl transition-opacity group-hover:opacity-60"
+              style={{ background: "var(--gradient-brand)" }}
+            />
             <div className="relative">
               <div className="mb-4 inline-flex size-10 items-center justify-center rounded-xl border border-border bg-background/50">
                 <f.icon className="size-5 text-brand-glow" />
@@ -272,7 +306,13 @@ function Pricing() {
       name: "Pro",
       price: "$12",
       desc: "For serious work.",
-      features: ["Unlimited AI messages", "Resume + cover letter suite", "PDF chat, flashcards, quizzes", "Priority models", "Export to PDF"],
+      features: [
+        "Unlimited AI messages",
+        "Resume + cover letter suite",
+        "PDF chat, flashcards, quizzes",
+        "Priority models",
+        "Export to PDF",
+      ],
       cta: "Go Pro",
       highlight: true,
     },
@@ -280,7 +320,12 @@ function Pricing() {
       name: "Team",
       price: "$29",
       desc: "For small teams.",
-      features: ["Everything in Pro", "Shared prompt library", "Admin dashboard", "SSO (coming soon)"],
+      features: [
+        "Everything in Pro",
+        "Shared prompt library",
+        "Admin dashboard",
+        "SSO (coming soon)",
+      ],
       cta: "Contact sales",
       highlight: false,
     },
@@ -304,8 +349,10 @@ function Pricing() {
             }
           >
             {p.highlight && (
-              <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full px-2.5 py-0.5 text-[10px] font-medium uppercase tracking-wider text-brand-foreground"
-                style={{ background: "var(--gradient-brand)" }}>
+              <div
+                className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full px-2.5 py-0.5 text-[10px] font-medium uppercase tracking-wider text-brand-foreground"
+                style={{ background: "var(--gradient-brand)" }}
+              >
                 Most popular
               </div>
             )}
@@ -347,7 +394,10 @@ function CTA() {
   return (
     <section className="mx-auto max-w-6xl px-4 py-20 sm:px-6">
       <div className="relative overflow-hidden rounded-3xl border border-border p-10 text-center sm:p-16">
-        <div className="absolute inset-0 -z-10 opacity-60" style={{ background: "var(--gradient-hero)" }} />
+        <div
+          className="absolute inset-0 -z-10 opacity-60"
+          style={{ background: "var(--gradient-hero)" }}
+        />
         <div className="absolute inset-0 -z-10 bg-grid opacity-30" />
         <Layers className="mx-auto size-6 text-brand-glow" />
         <h2 className="mt-4 font-display text-4xl tracking-tight sm:text-5xl">
@@ -356,7 +406,11 @@ function CTA() {
         <p className="mx-auto mt-4 max-w-lg text-muted-foreground">
           Join thousands using NeuraFlow to write, learn, and interview better every day.
         </p>
-        <Button asChild size="lg" className="mt-8 h-11 rounded-full bg-foreground px-6 text-background hover:bg-foreground/90">
+        <Button
+          asChild
+          size="lg"
+          className="mt-8 h-11 rounded-full bg-foreground px-6 text-background hover:bg-foreground/90"
+        >
           <Link to="/chat">
             Open NeuraFlow <ArrowRight className="ml-1 size-4" />
           </Link>

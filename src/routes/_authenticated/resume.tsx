@@ -42,7 +42,9 @@ function ResumePage() {
   const [role, setRole] = useState("");
   const [targetJob, setTargetJob] = useState("");
   const [background, setBackground] = useState("");
-  const [tone, setTone] = useState<"professional" | "confident" | "friendly" | "concise">("professional");
+  const [tone, setTone] = useState<"professional" | "confident" | "friendly" | "concise">(
+    "professional",
+  );
   const [preview, setPreview] = useState<ResumeData | null>(null);
 
   const { data: resumes } = useQuery({
@@ -171,12 +173,17 @@ function ResumePage() {
                   <div>
                     <div className="text-sm font-medium">{r.title}</div>
                     <div className="text-xs text-muted-foreground">
-                      {r.target_role} · {formatDistanceToNow(new Date(r.created_at), { addSuffix: true })}
+                      {r.target_role} ·{" "}
+                      {formatDistanceToNow(new Date(r.created_at), { addSuffix: true })}
                     </div>
                   </div>
                 </div>
                 <div className="flex gap-2">
-                  <Button size="sm" variant="secondary" onClick={() => setPreview(r.data as unknown as ResumeData)}>
+                  <Button
+                    size="sm"
+                    variant="secondary"
+                    onClick={() => setPreview(r.data as unknown as ResumeData)}
+                  >
                     Open
                   </Button>
                   <Button size="sm" variant="ghost" onClick={() => remove(r.id)}>
@@ -277,7 +284,9 @@ function downloadResume(data: ResumeData) {
   const lines: string[] = [];
   lines.push(data.full_name, data.headline, "");
   lines.push(
-    [data.contact.email, data.contact.phone, data.contact.location, data.contact.website].filter(Boolean).join(" · "),
+    [data.contact.email, data.contact.phone, data.contact.location, data.contact.website]
+      .filter(Boolean)
+      .join(" · "),
     "",
   );
   lines.push("SUMMARY", data.summary, "");
@@ -288,7 +297,9 @@ function downloadResume(data: ResumeData) {
     lines.push("");
   });
   lines.push("EDUCATION");
-  data.education.forEach((ed) => lines.push(`${ed.degree} — ${ed.school} (${ed.start} – ${ed.end})`));
+  data.education.forEach((ed) =>
+    lines.push(`${ed.degree} — ${ed.school} (${ed.start} – ${ed.end})`),
+  );
   lines.push("", "SKILLS", data.skills.join(", "));
   if (data.projects?.length) {
     lines.push("", "PROJECTS");

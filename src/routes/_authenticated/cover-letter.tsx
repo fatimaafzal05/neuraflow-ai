@@ -9,7 +9,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Loader2, Sparkles, Copy, Trash2, Mail } from "lucide-react";
 import { generateCoverLetter } from "@/lib/ai.functions";
 import { MessageContent } from "@/components/chat/message-content";
@@ -27,7 +33,9 @@ function CoverLetterPage() {
   const [role, setRole] = useState("");
   const [jd, setJd] = useState("");
   const [bg, setBg] = useState("");
-  const [tone, setTone] = useState<"professional" | "enthusiastic" | "warm" | "concise">("professional");
+  const [tone, setTone] = useState<"professional" | "enthusiastic" | "warm" | "concise">(
+    "professional",
+  );
   const [preview, setPreview] = useState<string>("");
 
   const { data: letters } = useQuery({
@@ -43,7 +51,8 @@ function CoverLetterPage() {
   });
 
   const mutation = useMutation({
-    mutationFn: async () => gen({ data: { company, role, jobDescription: jd, background: bg, tone } }),
+    mutationFn: async () =>
+      gen({ data: { company, role, jobDescription: jd, background: bg, tone } }),
     onSuccess: (res) => {
       setPreview(res.content);
       toast.success("Cover letter ready");
@@ -67,7 +76,11 @@ function CoverLetterPage() {
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <Label>Company</Label>
-                <Input value={company} onChange={(e) => setCompany(e.target.value)} className="mt-1.5" />
+                <Input
+                  value={company}
+                  onChange={(e) => setCompany(e.target.value)}
+                  className="mt-1.5"
+                />
               </div>
               <div>
                 <Label>Role</Label>
@@ -76,11 +89,21 @@ function CoverLetterPage() {
             </div>
             <div>
               <Label>Job description</Label>
-              <Textarea value={jd} onChange={(e) => setJd(e.target.value)} rows={5} className="mt-1.5" />
+              <Textarea
+                value={jd}
+                onChange={(e) => setJd(e.target.value)}
+                rows={5}
+                className="mt-1.5"
+              />
             </div>
             <div>
               <Label>Your background</Label>
-              <Textarea value={bg} onChange={(e) => setBg(e.target.value)} rows={5} className="mt-1.5" />
+              <Textarea
+                value={bg}
+                onChange={(e) => setBg(e.target.value)}
+                rows={5}
+                className="mt-1.5"
+              />
             </div>
             <div>
               <Label>Tone</Label>
@@ -137,7 +160,9 @@ function CoverLetterPage() {
             {preview ? (
               <MessageContent text={preview} />
             ) : (
-              <p className="text-center text-sm text-muted-foreground">Your cover letter will appear here.</p>
+              <p className="text-center text-sm text-muted-foreground">
+                Your cover letter will appear here.
+              </p>
             )}
           </div>
         </section>

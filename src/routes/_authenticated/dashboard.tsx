@@ -45,32 +45,50 @@ function DashboardPage() {
       const { data: user } = await supabase.auth.getUser();
       if (!user.user) return null;
       const uid = user.user.id;
+      const weekStart = new Date();
+      weekStart.setHours(0, 0, 0, 0);
+      weekStart.setDate(weekStart.getDate() - 6);
 
-      const [chats, resumes, letters, interviews, activity] = await Promise.all([
-        supabase.from("chats").select("id", { count: "exact", head: true }).eq("user_id", uid),
+      const [messages, resumes, letters, interviews, activity, weeklyActivity] = await Promise.all([
+        supabase
+          .from("activity_logs")
+          .select("id", { count: "exact", head: true })
+          .eq("user_id", uid)
+          .eq("action", "ai_message_sent"),
         supabase.from("resumes").select("id", { count: "exact", head: true }).eq("user_id", uid),
-        supabase.from("cover_letters").select("id", { count: "exact", head: true }).eq("user_id", uid),
-        supabase.from("interview_sessions").select("id", { count: "exact", head: true }).eq("user_id", uid),
+        supabase
+          .from("cover_letters")
+          .select("id", { count: "exact", head: true })
+          .eq("user_id", uid),
+        supabase
+          .from("interview_sessions")
+          .select("id", { count: "exact", head: true })
+          .eq("user_id", uid),
         supabase
           .from("activity_logs")
           .select("id, action, resource_type, created_at, metadata")
           .eq("user_id", uid)
           .order("created_at", { ascending: false })
           .limit(6),
+        supabase
+          .from("activity_logs")
+          .select("created_at")
+          .eq("user_id", uid)
+          .gte("created_at", weekStart.toISOString()),
       ]);
 
       return {
-        chats: chats.count ?? 0,
+        messages: messages.count ?? 0,
         resumes: resumes.count ?? 0,
         letters: letters.count ?? 0,
         interviews: interviews.count ?? 0,
         activity: activity.data ?? [],
+        weeklyActivity: weeklyActivity.data ?? [],
       };
     },
   });
 
-  // Fake weekly series for now (real chart driven by activity_logs aggregation later)
-  const series = buildWeeklySeries(stats?.activity ?? []);
+  const series = buildWeeklySeries(stats?.weeklyActivity ?? []);
 
   return (
     <div>
@@ -78,7 +96,10 @@ function DashboardPage() {
         title="Dashboard"
         description="A snapshot of your work in NeuraFlow."
         actions={
-          <Button asChild className="rounded-full bg-foreground text-background hover:bg-foreground/90">
+          <Button
+            asChild
+            className="rounded-full bg-foreground text-background hover:bg-foreground/90"
+          >
             <Link to="/chat">
               <Sparkles className="mr-1.5 size-4" /> New chat
             </Link>
@@ -88,7 +109,12 @@ function DashboardPage() {
 
       <div className="space-y-6 p-6 sm:p-8">
         <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-          <StatCard label="Conversations" value={stats?.chats ?? 0} icon={MessageSquare} accent="brand" />
+          <StatCard
+            label="AI messages"
+            value={stats?.messages ?? 0}
+            icon={MessageSquare}
+            accent="brand"
+          />
           <StatCard label="Resumes" value={stats?.resumes ?? 0} icon={FileText} accent="glow" />
           <StatCard label="Cover letters" value={stats?.letters ?? 0} icon={Mail} accent="brand" />
           <StatCard label="Interviews" value={stats?.interviews ?? 0} icon={Mic} accent="glow" />
@@ -116,8 +142,20 @@ function DashboardPage() {
                     </linearGradient>
                   </defs>
                   <CartesianGrid strokeDasharray="3 3" stroke="oklch(1 0 0 / 6%)" />
-                  <XAxis dataKey="day" stroke="oklch(0.68 0.02 260)" fontSize={11} tickLine={false} axisLine={false} />
-                  <YAxis stroke="oklch(0.68 0.02 260)" fontSize={11} tickLine={false} axisLine={false} width={30} />
+                  <XAxis
+                    dataKey="day"
+                    stroke="oklch(0.68 0.02 260)"
+                    fontSize={11}
+                    tickLine={false}
+                    axisLine={false}
+                  />
+                  <YAxis
+                    stroke="oklch(0.68 0.02 260)"
+                    fontSize={11}
+                    tickLine={false}
+                    axisLine={false}
+                    width={30}
+                  />
                   <Tooltip
                     cursor={{ stroke: "oklch(1 0 0 / 10%)" }}
                     contentStyle={{
@@ -127,14 +165,22 @@ function DashboardPage() {
                       fontSize: 12,
                     }}
                   />
-                  <Area type="monotone" dataKey="events" stroke="oklch(0.68 0.2 285)" strokeWidth={2} fill="url(#fillBrand)" />
+                  <Area
+                    type="monotone"
+                    dataKey="events"
+                    stroke="oklch(0.68 0.2 285)"
+                    strokeWidth={2}
+                    fill="url(#fillBrand)"
+                  />
                 </AreaChart>
               </ResponsiveContainer>
             </div>
           </div>
 
           <div className="rounded-2xl border border-border bg-card/40 p-6 backdrop-blur">
-            <p className="text-xs uppercase tracking-wider text-muted-foreground">Recent activity</p>
+            <p className="text-xs uppercase tracking-wider text-muted-foreground">
+              Recent activity
+            </p>
             <div className="mt-4 space-y-3">
               {(stats?.activity ?? []).length === 0 ? (
                 <p className="py-8 text-center text-sm text-muted-foreground">
@@ -168,7 +214,10 @@ function DashboardPage() {
                 to={q.to}
                 className="group relative overflow-hidden rounded-2xl border border-border bg-card/40 p-5 backdrop-blur transition-all hover:-translate-y-0.5 hover:border-brand/40"
               >
-                <div className="absolute -right-6 -top-6 size-24 rounded-full opacity-0 blur-2xl transition-opacity group-hover:opacity-60" style={{ background: "var(--gradient-brand)" }} />
+                <div
+                  className="absolute -right-6 -top-6 size-24 rounded-full opacity-0 blur-2xl transition-opacity group-hover:opacity-60"
+                  style={{ background: "var(--gradient-brand)" }}
+                />
                 <q.icon className="size-5 text-brand-glow" />
                 <div className="mt-4 font-medium">{q.title}</div>
                 <div className="mt-0.5 text-xs text-muted-foreground">{q.desc}</div>

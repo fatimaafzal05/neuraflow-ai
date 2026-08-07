@@ -8,8 +8,24 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Loader2, Sparkles, BookOpen, Layers, HelpCircle, ChevronLeft, ChevronRight, Check, X } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Loader2,
+  Sparkles,
+  BookOpen,
+  Layers,
+  HelpCircle,
+  ChevronLeft,
+  ChevronRight,
+  Check,
+  X,
+} from "lucide-react";
 import { generateStudyPack } from "@/lib/ai.functions";
 import { MessageContent } from "@/components/chat/message-content";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -46,7 +62,10 @@ function StudyPage() {
 
   return (
     <div>
-      <PageHeader title="Study Assistant" description="Notes, flashcards, and quizzes on any topic." />
+      <PageHeader
+        title="Study Assistant"
+        description="Notes, flashcards, and quizzes on any topic."
+      />
       <div className="grid gap-6 p-6 sm:p-8 lg:grid-cols-[380px_1fr]">
         <section className="rounded-2xl border border-border bg-card/40 p-6 backdrop-blur">
           <h2 className="font-display text-xl tracking-tight">Generate</h2>
@@ -120,7 +139,10 @@ function StudyPage() {
                   </TabsTrigger>
                 </TabsList>
               </div>
-              <TabsContent value="notes" className="mt-4 max-h-[70vh] overflow-y-auto rounded-xl border border-border bg-background p-6">
+              <TabsContent
+                value="notes"
+                className="mt-4 max-h-[70vh] overflow-y-auto rounded-xl border border-border bg-background p-6"
+              >
                 <p className="text-sm text-muted-foreground">{pack.summary}</p>
                 <ul className="mt-3 list-disc space-y-1 pl-5 text-sm">
                   {pack.key_points.map((k, i) => (
@@ -230,9 +252,7 @@ function Quiz({ questions }: { questions: Pack["quiz"] }) {
               );
             })}
           </div>
-          {submitted && (
-            <p className="mt-2 text-xs text-muted-foreground">{q.explanation}</p>
-          )}
+          {submitted && <p className="mt-2 text-xs text-muted-foreground">{q.explanation}</p>}
         </div>
       ))}
       <div className="flex items-center justify-between">

@@ -8,7 +8,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { BookOpen, Copy, Plus, Star, Trash2 } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/prompts")({
@@ -70,7 +76,9 @@ function PromptsPage() {
   };
 
   const filtered = (prompts ?? []).filter((p) =>
-    !q ? true : (p.title + " " + p.body + " " + (p.category ?? "")).toLowerCase().includes(q.toLowerCase()),
+    !q
+      ? true
+      : (p.title + " " + p.body + " " + (p.category ?? "")).toLowerCase().includes(q.toLowerCase()),
   );
 
   return (
@@ -92,7 +100,11 @@ function PromptsPage() {
               <div className="space-y-3">
                 <div>
                   <Label>Title</Label>
-                  <Input value={title} onChange={(e) => setTitle(e.target.value)} className="mt-1.5" />
+                  <Input
+                    value={title}
+                    onChange={(e) => setTitle(e.target.value)}
+                    className="mt-1.5"
+                  />
                 </div>
                 <div>
                   <Label>Category (optional)</Label>
@@ -105,7 +117,12 @@ function PromptsPage() {
                 </div>
                 <div>
                   <Label>Prompt</Label>
-                  <Textarea value={body} onChange={(e) => setBody(e.target.value)} rows={8} className="mt-1.5" />
+                  <Textarea
+                    value={body}
+                    onChange={(e) => setBody(e.target.value)}
+                    rows={8}
+                    className="mt-1.5"
+                  />
                 </div>
                 <Button
                   onClick={() => create.mutate()}
@@ -134,7 +151,10 @@ function PromptsPage() {
         ) : (
           <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
             {filtered.map((p) => (
-              <div key={p.id} className="group rounded-2xl border border-border bg-card/40 p-5 backdrop-blur">
+              <div
+                key={p.id}
+                className="group rounded-2xl border border-border bg-card/40 p-5 backdrop-blur"
+              >
                 <div className="flex items-start justify-between">
                   <div>
                     <div className="text-sm font-semibold">{p.title}</div>
@@ -148,7 +168,9 @@ function PromptsPage() {
                     />
                   </button>
                 </div>
-                <p className="mt-3 line-clamp-4 whitespace-pre-wrap text-xs text-muted-foreground">{p.body}</p>
+                <p className="mt-3 line-clamp-4 whitespace-pre-wrap text-xs text-muted-foreground">
+                  {p.body}
+                </p>
                 <div className="mt-3 flex justify-end gap-2 opacity-0 transition group-hover:opacity-100">
                   <Button
                     size="sm"

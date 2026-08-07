@@ -21,7 +21,7 @@ bun run build
 
 ### Environment variables
 
-Copy `.env` and set:
+Copy `.env.example` to `.env` and set:
 
 ```
 SUPABASE_URL=...
@@ -31,6 +31,9 @@ VITE_SUPABASE_PUBLISHABLE_KEY=...
 VITE_SUPABASE_PROJECT_ID=...
 LOVABLE_API_KEY=...            # server-only, for AI Gateway
 ```
+
+Never commit `.env`. The publishable Supabase values may be exposed to the browser, but the
+Lovable API key must remain server-only.
 
 ## Project structure
 

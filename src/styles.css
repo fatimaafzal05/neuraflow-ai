@@ -52,7 +52,8 @@
     color-mix(in oklab, var(--card) 92%, transparent),
     color-mix(in oklab, var(--card) 70%, transparent)
   );
-  --gradient-hero: radial-gradient(
+  --gradient-hero:
+    radial-gradient(
       ellipse 80% 60% at 50% 0%,
       color-mix(in oklab, var(--brand) 25%, transparent),
       transparent 60%
@@ -148,8 +149,13 @@
 }
 
 @keyframes pulse-glow {
-  0%, 100% { opacity: 0.6; }
-  50% { opacity: 1; }
+  0%,
+  100% {
+    opacity: 0.6;
+  }
+  50% {
+    opacity: 1;
+  }
 }
 
 .hljs {

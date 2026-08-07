@@ -1,17 +1,39 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { createLovableAiGatewayProvider } from "@/lib/ai-gateway.server";
+import type { Database } from "@/integrations/supabase/types";
+import type { SupabaseClient } from "@supabase/supabase-js";
 import { generateText, Output, NoObjectGeneratedError } from "ai";
 import { z } from "zod";
 
 // ---------- shared ----------
+type AppSupabaseClient = SupabaseClient<Database>;
+
 function getGateway(structured = false) {
   const key = process.env.LOVABLE_API_KEY;
-  if (!key) throw new Error("Missing LOVABLE_API_KEY");
+  if (!key) {
+    throw new Error(
+      "AI is not configured. Add LOVABLE_API_KEY to the server environment and try again.",
+    );
+  }
   return createLovableAiGatewayProvider(key, undefined, { structuredOutputs: structured });
 }
 
-async function bumpUsage(supabase: any, userId: string) {
+async function ensureUsageAvailable(supabase: AppSupabaseClient, userId: string) {
+  const { data, error } = await supabase
+    .from("profiles")
+    .select("ai_messages_used, ai_messages_limit")
+    .eq("id", userId)
+    .maybeSingle();
+
+  if (error) throw error;
+  if (!data) throw new Error("Your profile is still being created. Please try again in a moment.");
+  if (data.ai_messages_used >= data.ai_messages_limit) {
+    throw new Error("You've reached your AI message limit for this plan.");
+  }
+}
+
+async function bumpUsage(supabase: AppSupabaseClient, userId: string) {
   const { data } = await supabase
     .from("profiles")
     .select("ai_messages_used")
@@ -21,8 +43,16 @@ async function bumpUsage(supabase: any, userId: string) {
   await supabase.from("profiles").update({ ai_messages_used: used }).eq("id", userId);
 }
 
-async function logActivity(supabase: any, userId: string, action: string, resource_type?: string, resource_id?: string) {
-  await supabase.from("activity_logs").insert({ user_id: userId, action, resource_type, resource_id });
+async function logActivity(
+  supabase: AppSupabaseClient,
+  userId: string,
+  action: string,
+  resourceType?: string,
+  resourceId?: string,
+) {
+  await supabase
+    .from("activity_logs")
+    .insert({ user_id: userId, action, resource_type: resourceType, resource_id: resourceId });
 }
 
 // ---------- Resume: generate structured resume ----------
@@ -68,7 +98,8 @@ export const generateResume = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((raw: unknown) => ResumeInput.parse(raw))
   .handler(async ({ data, context }) => {
-    const gateway = getGateway(false);
+    await ensureUsageAvailable(context.supabase, context.userId);
+    const gateway = getGateway(true);
     const model = gateway("google/gemini-2.5-flash");
 
     const prompt = `Craft a polished, ATS-friendly resume as strict JSON.
@@ -127,6 +158,7 @@ export const generateCoverLetter = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((raw: unknown) => CoverInput.parse(raw))
   .handler(async ({ data, context }) => {
+    await ensureUsageAvailable(context.supabase, context.userId);
     const gateway = getGateway(false);
     const model = gateway("google/gemini-2.5-flash");
 
@@ -168,7 +200,13 @@ Requirements:
     if (error) throw error;
 
     await bumpUsage(context.supabase, context.userId);
-    await logActivity(context.supabase, context.userId, "cover_letter.generated", "cover_letter", row.id);
+    await logActivity(
+      context.supabase,
+      context.userId,
+      "cover_letter.generated",
+      "cover_letter",
+      row.id,
+    );
     return { id: row.id, content: text };
   });
 
@@ -199,7 +237,8 @@ export const generateStudyPack = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((raw: unknown) => StudyInput.parse(raw))
   .handler(async ({ data, context }) => {
-    const gateway = getGateway(false);
+    await ensureUsageAvailable(context.supabase, context.userId);
+    const gateway = getGateway(true);
     const model = gateway("google/gemini-2.5-flash");
 
     const prompt = `Create a study pack as strict JSON for the topic "${data.topic}" at ${data.level} level.
@@ -251,7 +290,13 @@ Include:
     if (quizErr) throw quizErr;
 
     await bumpUsage(context.supabase, context.userId);
-    await logActivity(context.supabase, context.userId, "study.generated", "flashcard_deck", deck.id);
+    await logActivity(
+      context.supabase,
+      context.userId,
+      "study.generated",
+      "flashcard_deck",
+      deck.id,
+    );
     return { pack, deckId: deck.id, quizId: quiz.id };
   });
 
@@ -278,10 +323,13 @@ export const interviewTurn = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((raw: unknown) => InterviewTurn.parse(raw))
   .handler(async ({ data, context }) => {
-    const gateway = getGateway(false);
+    await ensureUsageAvailable(context.supabase, context.userId);
+    const gateway = getGateway(true);
     const model = gateway("google/gemini-2.5-flash");
 
-    const transcriptText = data.transcript.map((t) => `${t.role.toUpperCase()}: ${t.text}`).join("\n");
+    const transcriptText = data.transcript
+      .map((t) => `${t.role.toUpperCase()}: ${t.text}`)
+      .join("\n");
     const prompt = `You are a senior hiring manager running a live mock interview for a ${data.level} ${data.role}.
 Transcript so far:
 """
