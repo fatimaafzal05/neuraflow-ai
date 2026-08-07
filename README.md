@@ -29,11 +29,15 @@ SUPABASE_PUBLISHABLE_KEY=...
 VITE_SUPABASE_URL=...
 VITE_SUPABASE_PUBLISHABLE_KEY=...
 VITE_SUPABASE_PROJECT_ID=...
-LOVABLE_API_KEY=...            # server-only, for AI Gateway
+LOVABLE_API_KEY=...            # optional, server-only, for cloud AI responses
 ```
 
 Never commit `.env`. The publishable Supabase values may be exposed to the browser, but the
 Lovable API key must remain server-only.
+
+Without `LOVABLE_API_KEY`, the app runs in built-in offline mode: chat, resume, cover letter,
+study, and interview features remain usable with local template-based responses. Add the key
+later to switch those features to cloud-generated responses automatically.
 
 ## Project structure
 

@@ -1,7 +1,14 @@
 import { createLovableAiGatewayProvider } from "@/lib/ai-gateway.server";
+import { createOfflineChatReply, isCloudAiConfigured } from "@/lib/offline-assistant.server";
 import { createFileRoute } from "@tanstack/react-router";
 import { createClient } from "@supabase/supabase-js";
-import { convertToModelMessages, streamText, type UIMessage } from "ai";
+import {
+  convertToModelMessages,
+  createUIMessageStream,
+  createUIMessageStreamResponse,
+  streamText,
+  type UIMessage,
+} from "ai";
 
 const SYSTEM_PROMPT = `You are NeuraFlow AI, a warm and sharp career + productivity copilot for students, freelancers, and professionals.
 
@@ -38,26 +45,34 @@ export const Route = createFileRoute("/api/chat")({
           .select("ai_messages_used, ai_messages_limit")
           .eq("id", userData.user.id)
           .maybeSingle();
-        if (profileError) return new Response("Could not verify your AI usage.", { status: 500 });
-        if (!profile)
+        const cloudAi = isCloudAiConfigured();
+        if (cloudAi && profileError)
+          return new Response("Could not verify your AI usage.", { status: 500 });
+        if (cloudAi && !profile)
           return new Response("Your profile is still being created. Please try again.", {
             status: 409,
           });
-        if (profile.ai_messages_used >= profile.ai_messages_limit) {
+        if (cloudAi && profile && profile.ai_messages_used >= profile.ai_messages_limit) {
           return new Response("You've reached your AI message limit for this plan.", {
             status: 429,
           });
         }
 
-        const key = process.env.LOVABLE_API_KEY;
-        if (!key) {
-          return new Response(
-            "AI is not configured. Add LOVABLE_API_KEY to the server environment and try again.",
-            { status: 503 },
-          );
+        if (!cloudAi) {
+          const responseText = createOfflineChatReply(messages);
+          const stream = createUIMessageStream({
+            originalMessages: messages,
+            execute: ({ writer }) => {
+              const id = "offline-response";
+              writer.write({ type: "text-start", id });
+              writer.write({ type: "text-delta", id, delta: responseText });
+              writer.write({ type: "text-end", id });
+            },
+          });
+          return createUIMessageStreamResponse({ stream });
         }
 
-        const gateway = createLovableAiGatewayProvider(key);
+        const gateway = createLovableAiGatewayProvider(process.env.LOVABLE_API_KEY!);
         try {
           const result = streamText({
             model: gateway("google/gemini-2.5-flash"),
@@ -66,7 +81,7 @@ export const Route = createFileRoute("/api/chat")({
             onFinish: async () => {
               const { error } = await supabase
                 .from("profiles")
-                .update({ ai_messages_used: profile.ai_messages_used + 1 })
+                .update({ ai_messages_used: profile!.ai_messages_used + 1 })
                 .eq("id", userData.user.id);
               if (error) console.error("Unable to record AI usage", error);
             },

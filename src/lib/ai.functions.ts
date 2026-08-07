@@ -1,6 +1,13 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { createLovableAiGatewayProvider } from "@/lib/ai-gateway.server";
+import {
+  createOfflineCoverLetter,
+  createOfflineInterviewTurn,
+  createOfflineResume,
+  createOfflineStudyPack,
+  isCloudAiConfigured,
+} from "@/lib/offline-assistant.server";
 import type { Database } from "@/integrations/supabase/types";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { generateText, Output, NoObjectGeneratedError } from "ai";
@@ -11,11 +18,7 @@ type AppSupabaseClient = SupabaseClient<Database>;
 
 function getGateway(structured = false) {
   const key = process.env.LOVABLE_API_KEY;
-  if (!key) {
-    throw new Error(
-      "AI is not configured. Add LOVABLE_API_KEY to the server environment and try again.",
-    );
-  }
+  if (!key) throw new Error("Cloud AI is not configured.");
   return createLovableAiGatewayProvider(key, undefined, { structuredOutputs: structured });
 }
 
@@ -98,11 +101,13 @@ export const generateResume = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((raw: unknown) => ResumeInput.parse(raw))
   .handler(async ({ data, context }) => {
-    await ensureUsageAvailable(context.supabase, context.userId);
-    const gateway = getGateway(true);
-    const model = gateway("google/gemini-2.5-flash");
-
-    const prompt = `Craft a polished, ATS-friendly resume as strict JSON.
+    const cloudAi = isCloudAiConfigured();
+    if (cloudAi) await ensureUsageAvailable(context.supabase, context.userId);
+    let resume: z.infer<typeof ResumeSchema>;
+    if (cloudAi) {
+      const gateway = getGateway(true);
+      const model = gateway("google/gemini-2.5-flash");
+      const prompt = `Craft a polished, ATS-friendly resume as strict JSON.
 
 Target role: ${data.role}
 ${data.targetJob ? `Target job description:\n${data.targetJob}\n` : ""}
@@ -112,21 +117,19 @@ ${data.background}
 """
 
 Tone: ${data.tone}. Rewrite bullets to start with strong verbs, quantify impact, and align keywords to the target role. Fill contact fields with placeholders like "you@email.com" if the candidate did not provide them.`;
-
-    let resume: z.infer<typeof ResumeSchema>;
-    try {
-      const { output } = await generateText({
-        model,
-        output: Output.object({ schema: ResumeSchema }),
-        prompt,
-      });
-      resume = output;
-    } catch (err) {
-      if (NoObjectGeneratedError.isInstance(err)) {
-        throw new Error("AI could not structure the resume. Please try again with more detail.");
+      try {
+        const { output } = await generateText({
+          model,
+          output: Output.object({ schema: ResumeSchema }),
+          prompt,
+        });
+        resume = output;
+      } catch (err) {
+        if (NoObjectGeneratedError.isInstance(err))
+          throw new Error("AI could not structure the resume. Please try again with more detail.");
+        throw err;
       }
-      throw err;
-    }
+    } else resume = createOfflineResume(data);
 
     const { data: row, error } = await context.supabase
       .from("resumes")
@@ -140,7 +143,7 @@ Tone: ${data.tone}. Rewrite bullets to start with strong verbs, quantify impact,
       .single();
     if (error) throw error;
 
-    await bumpUsage(context.supabase, context.userId);
+    if (cloudAi) await bumpUsage(context.supabase, context.userId);
     await logActivity(context.supabase, context.userId, "resume.generated", "resume", row.id);
     return { id: row.id, resume };
   });
@@ -158,13 +161,15 @@ export const generateCoverLetter = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((raw: unknown) => CoverInput.parse(raw))
   .handler(async ({ data, context }) => {
-    await ensureUsageAvailable(context.supabase, context.userId);
-    const gateway = getGateway(false);
-    const model = gateway("google/gemini-2.5-flash");
-
-    const { text } = await generateText({
-      model,
-      prompt: `Write a tailored cover letter (about 280-380 words) in a ${data.tone} tone.
+    const cloudAi = isCloudAiConfigured();
+    if (cloudAi) await ensureUsageAvailable(context.supabase, context.userId);
+    let text: string;
+    if (cloudAi) {
+      const gateway = getGateway(false);
+      const model = gateway("google/gemini-2.5-flash");
+      ({ text } = await generateText({
+        model,
+        prompt: `Write a tailored cover letter (about 280-380 words) in a ${data.tone} tone.
 
 Company: ${data.company}
 Role: ${data.role}
@@ -185,7 +190,8 @@ Requirements:
 - Close with a clear, confident call to action.
 - Markdown formatting: paragraphs separated by blank lines, no headings, no bullet lists.
 - Do not invent fake companies or metrics; when unknown, use plausible neutral phrasing.`,
-    });
+      }));
+    } else text = createOfflineCoverLetter(data);
 
     const { data: row, error } = await context.supabase
       .from("cover_letters")
@@ -199,7 +205,7 @@ Requirements:
       .single();
     if (error) throw error;
 
-    await bumpUsage(context.supabase, context.userId);
+    if (cloudAi) await bumpUsage(context.supabase, context.userId);
     await logActivity(
       context.supabase,
       context.userId,
@@ -237,11 +243,13 @@ export const generateStudyPack = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((raw: unknown) => StudyInput.parse(raw))
   .handler(async ({ data, context }) => {
-    await ensureUsageAvailable(context.supabase, context.userId);
-    const gateway = getGateway(true);
-    const model = gateway("google/gemini-2.5-flash");
-
-    const prompt = `Create a study pack as strict JSON for the topic "${data.topic}" at ${data.level} level.
+    const cloudAi = isCloudAiConfigured();
+    if (cloudAi) await ensureUsageAvailable(context.supabase, context.userId);
+    let pack: z.infer<typeof StudySchema>;
+    if (cloudAi) {
+      const gateway = getGateway(true);
+      const model = gateway("google/gemini-2.5-flash");
+      const prompt = `Create a study pack as strict JSON for the topic "${data.topic}" at ${data.level} level.
 ${data.source ? `Base it on this source material:\n"""${data.source.slice(0, 18000)}"""\n` : ""}
 Include:
 - title, one-paragraph summary
@@ -249,21 +257,19 @@ Include:
 - notes_markdown: well-structured markdown notes with headings and bullets
 - flashcards: 8-12 concise front/back cards
 - quiz: 5 multiple-choice questions with 4 choices each, answer_index (0-3), and a one-line explanation.`;
-
-    let pack: z.infer<typeof StudySchema>;
-    try {
-      const { output } = await generateText({
-        model,
-        output: Output.object({ schema: StudySchema }),
-        prompt,
-      });
-      pack = output;
-    } catch (err) {
-      if (NoObjectGeneratedError.isInstance(err)) {
-        throw new Error("AI could not structure the study pack. Try a narrower topic.");
+      try {
+        const { output } = await generateText({
+          model,
+          output: Output.object({ schema: StudySchema }),
+          prompt,
+        });
+        pack = output;
+      } catch (err) {
+        if (NoObjectGeneratedError.isInstance(err))
+          throw new Error("AI could not structure the study pack. Try a narrower topic.");
+        throw err;
       }
-      throw err;
-    }
+    } else pack = createOfflineStudyPack(data);
 
     const { data: deck, error: deckErr } = await context.supabase
       .from("flashcard_decks")
@@ -289,7 +295,7 @@ Include:
       .single();
     if (quizErr) throw quizErr;
 
-    await bumpUsage(context.supabase, context.userId);
+    if (cloudAi) await bumpUsage(context.supabase, context.userId);
     await logActivity(
       context.supabase,
       context.userId,
@@ -323,10 +329,11 @@ export const interviewTurn = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((raw: unknown) => InterviewTurn.parse(raw))
   .handler(async ({ data, context }) => {
-    await ensureUsageAvailable(context.supabase, context.userId);
+    const cloudAi = isCloudAiConfigured();
+    if (cloudAi) await ensureUsageAvailable(context.supabase, context.userId);
+    if (!cloudAi) return createOfflineInterviewTurn(data);
     const gateway = getGateway(true);
     const model = gateway("google/gemini-2.5-flash");
-
     const transcriptText = data.transcript
       .map((t) => `${t.role.toUpperCase()}: ${t.text}`)
       .join("\n");
