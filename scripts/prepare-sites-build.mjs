@@ -6,3 +6,5 @@ await rm("dist", { recursive: true, force: true });
 await mkdir("dist/server", { recursive: true });
 await cp(".output", "dist", { recursive: true });
 await cp(".output/server/index.mjs", "dist/server/index.js");
+await mkdir("dist/.openai", { recursive: true });
+await cp(".openai/hosting.json", "dist/.openai/hosting.json");
