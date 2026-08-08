@@ -9,3 +9,4 @@ await cp(".output/server", "dist/server", { recursive: true });
 await cp(".output/server/index.mjs", "dist/server/index.js");
 await mkdir("dist/.openai", { recursive: true });
 await cp(".openai/hosting.json", "dist/.openai/hosting.json");
+await cp("scripts/sites-worker.mjs", "dist/server/index.js");
