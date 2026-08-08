@@ -166,6 +166,13 @@ export function createOfflineChatReply(messages: UIMessage[]) {
   const turn = messages.filter((message) => message.role === "assistant").length + 1;
   const topic = topicFrom(question);
 
+  if (/^(hi+|hello+|hey+|helo+|hell+o+)[!. ]*$/.test(normalized)) {
+    return `## Hi — I’m ready to help\n\nI can help you with:\n\n- **Resume or cover letter** writing\n- **Interview** practice\n- **Study plans** and exam preparation\n- A focused **productivity plan**\n\nTell me your goal in one sentence, for example: “Make me a 7-day plan to prepare for my AWS exam.”`;
+  }
+  if (/(^|\s)(help|helpd|hlp|assist)(\s|$)/.test(normalized) && question.length < 40) {
+    return `## What would you like help with?\n\nChoose one and add a little detail:\n\n1. **Career:** resume, cover letter, or job application\n2. **Interview:** role and experience level\n3. **Study:** subject, exam, and deadline\n4. **Productivity:** task and deadline\n\nExample: “Help me prepare for a software engineering interview next week.”`;
+  }
+
   if (/(exam|study|learn|certif|aws)/.test(normalized)) {
     const focus = pick(
       [
