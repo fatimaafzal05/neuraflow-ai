@@ -1,60 +1,79 @@
 # NeuraFlow AI
 
-NeuraFlow AI is a focused workspace for career preparation, interview practice, study support, and everyday productivity. It runs entirely in guest mode, keeping your session and saved work in the current browser.
+> A polished, privacy-conscious productivity workspace for job seekers, students, and early-career professionals.
 
-## What you can do
+[Live demo](https://neuraflow-ai-fatima-2026.fa23-bcs-048.chatgpt.site) · [Source code](https://github.com/fatimaafzal05/neuraflow-ai)
 
-- Chat with a practical career and productivity assistant
-- Create, preview, download, and save targeted resumes
-- Draft tailored cover letters
-- Run a five-question mock interview with feedback and scoring
-- Generate study notes, flashcards, and quizzes
-- Save reusable prompts and review activity from a personal dashboard
+NeuraFlow AI brings practical career and learning workflows into one responsive web experience. It helps a user turn a vague goal—preparing for an interview, tailoring a résumé, planning revision, or drafting a cover letter—into a structured next step.
 
-## AI modes
+## Why this project matters
 
-NeuraFlow works in either of these modes:
+This project is designed as a portfolio-quality product build rather than a single-page UI exercise. It demonstrates the ability to:
 
-| Mode              | Setup                               | Behaviour                                                                                     |
-| ----------------- | ----------------------------------- | --------------------------------------------------------------------------------------------- |
-| Offline (default) | No AI key required                  | Provides instant, template-based chat and generation features. Ideal for demos and local use. |
-| Cloud AI          | Set `LOVABLE_API_KEY` on the server | Uses Google Gemini 2.5 Flash through the Lovable AI Gateway for generated responses.          |
+- Turn a broad user problem into focused, task-specific workflows
+- Build a coherent, responsive interface with a consistent component system
+- Design client-side data flows that work without a database setup
+- Create useful AI-style outputs with a dependable offline fallback
+- Ship a TypeScript application with production build and deployment configuration
 
-The app selects cloud AI automatically when the key is available; otherwise it remains fully usable in offline mode. API requests require an authenticated user in either mode.
+## What users can do
 
-## Technology
+| Workflow | User value |
+| --- | --- |
+| AI chat | Get structured help with careers, study planning, productivity, and interview preparation. |
+| Résumé builder | Create, preview, save, and download a targeted résumé. |
+| Cover letter generator | Draft a role-specific letter from a job description and personal context. |
+| Interview coach | Practice a five-question interview and receive clear, actionable feedback. |
+| Study assistant | Generate notes, flashcards, and quiz questions from a topic. |
+| Prompt library and dashboard | Keep useful prompts and review activity in one personal workspace. |
 
-- **App:** TanStack Start, React 19, TypeScript, Vite
-- **UI:** Tailwind CSS v4, shadcn/ui, Motion, Lucide
-- **Data and auth:** Browser local storage and guest sessions
-- **State:** TanStack Query and Zustand
-- **AI:** Vercel AI SDK with an optional Lovable/Gemini provider and a built-in offline fallback
+## Product decisions
 
-## Getting started
+### Works without a backend account
 
-### Prerequisites
+NeuraFlow uses browser-local guest storage for the demo experience. A visitor can explore the product without creating a remote account or configuring Supabase. Their saved work stays in their own browser, rather than being shared with other visitors.
 
-- Node.js 20 or newer
+### Useful even without an API key
 
-### Install and run
+The app has an offline assistant that produces varied, structured responses for core workflows. This makes the project demonstrable and functional without requiring users to bring an AI-provider key.
+
+### Transparent limitations
+
+The default assistant is a rules-based fallback, not a general-purpose large language model. It is suitable for demo and portfolio use; users should verify important career, academic, and professional information before relying on it.
+
+## Tech stack
+
+- **Frontend:** React 19, TypeScript, TanStack Start, Vite
+- **UI system:** Tailwind CSS v4, shadcn/ui, Radix UI, Motion, Lucide
+- **Data and state:** Browser local storage, TanStack Query, Zustand
+- **AI integration:** Vercel AI SDK with an offline assistant fallback
+- **Quality and delivery:** ESLint, TypeScript checks, production build scripts, public deployment configuration
+
+## Architecture highlights
+
+```text
+Browser
+  ├─ Marketing site and product workspace
+  ├─ Local guest session + browser-local saved data
+  ├─ Career, study, interview, and writing workflows
+  └─ Chat API route → offline response generator
+
+Production build
+  └─ TanStack Start / Nitro output packaged for deployment
+```
+
+## Run locally
+
+**Requirements:** Node.js 20 or newer.
 
 ```bash
 npm install
-copy .env.example .env
 npm run dev
 ```
 
-Open the local address printed by Vite (normally `http://localhost:8080`).
+Open the local address printed by Vite. No environment variables are required for the guest-mode experience.
 
-On macOS or Linux, use this instead of `copy`:
-
-```bash
-cp .env.example .env
-```
-
-No environment variables are required for guest mode.
-
-## Quality checks
+## Verify quality
 
 ```bash
 npm run lint
@@ -62,28 +81,20 @@ npx tsc --noEmit
 npm run build
 ```
 
-## Project layout
+## Project structure
 
 ```text
 src/
-  routes/                     Pages, route guards, and the chat API
-    _authenticated/           Signed-in workspace
-  components/                 Brand, app, marketing, and UI components
-  integrations/supabase/      Supabase clients and auth middleware
-  lib/
-    ai.functions.ts           Server-side generators and persistence
-    offline-assistant.server.ts Credential-free fallback assistant
-    ai-gateway.server.ts      Optional cloud AI provider
-supabase/migrations/          Schema, RLS policies, roles, and triggers
+  routes/                  Marketing, workspace pages, and chat route
+  components/              Reusable UI, application shell, and branding
+  integrations/            Browser-local data and guest-session adapter
+  lib/                     Offline assistant and workflow generators
+scripts/                   Production packaging helpers
 ```
 
-## Security and data
+## Privacy
 
-Guest-mode data is stored in the browser only. Clearing browser storage or switching browsers removes access to it. Do not store sensitive personal data in the app.
-
-## Deployment
-
-Deploy to any compatible hosting provider after running `npm run build`. Each browser keeps its own local guest workspace.
+Guest-mode data is stored in the current browser only. Clearing site data or changing browsers removes access to saved items. Avoid storing sensitive personal information in a portfolio demo.
 
 ## License
 
