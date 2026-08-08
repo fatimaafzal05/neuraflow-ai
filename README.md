@@ -1,10 +1,10 @@
-# NeuraFlow AI
+# CareerPilot AI
 
 > A polished, privacy-conscious productivity workspace for job seekers, students, and early-career professionals.
 
 [Live demo](https://neuraflow-ai-fatima-2026.fa23-bcs-048.chatgpt.site) · [Source code](https://github.com/fatimaafzal05/neuraflow-ai)
 
-NeuraFlow AI brings practical career and learning workflows into one responsive web experience. It helps a user turn a vague goal—preparing for an interview, tailoring a résumé, planning revision, or drafting a cover letter—into a structured next step.
+CareerPilot AI brings practical career and learning workflows into one responsive web experience. It helps a user turn a vague goal—preparing for an interview, tailoring a résumé, planning revision, or drafting a cover letter—into a structured next step.
 
 ## Why this project matters
 
